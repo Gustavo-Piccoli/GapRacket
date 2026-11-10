@@ -54,7 +54,7 @@ def step_simulation(
 
     paddle_collision = resolve_paddle_collision(
         ball.position, ball.velocity, config.ball_radius,
-        paddle.position, paddle.velocity, config.paddle_radius,
+        paddle.position, paddle.previous_position, paddle.velocity, config.paddle_radius,
         config.restitution,
     )
     if paddle_collision is not None:

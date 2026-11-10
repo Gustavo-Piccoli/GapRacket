@@ -112,7 +112,8 @@ def test_resolve_wall_collision_no_wall_hit_is_unchanged():
 def test_resolve_paddle_collision_overlapping_separates_and_bounces():
     result = resolve_paddle_collision(
         ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(5, 0), ball_radius=10.0,
-        paddle_pos=pygame.math.Vector2(15, 0), paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        paddle_pos=pygame.math.Vector2(15, 0), paddle_prev_pos=pygame.math.Vector2(15, 0),
+        paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
         restitution=1.0,
     )
     assert result is not None
@@ -124,7 +125,8 @@ def test_resolve_paddle_collision_overlapping_separates_and_bounces():
 def test_resolve_paddle_collision_no_overlap_returns_none():
     result = resolve_paddle_collision(
         ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(0, 0), ball_radius=10.0,
-        paddle_pos=pygame.math.Vector2(100, 0), paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        paddle_pos=pygame.math.Vector2(100, 0), paddle_prev_pos=pygame.math.Vector2(100, 0),
+        paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
         restitution=1.0,
     )
     assert result is None
@@ -133,7 +135,8 @@ def test_resolve_paddle_collision_no_overlap_returns_none():
 def test_resolve_paddle_collision_zero_restitution_kills_closing_speed():
     _, new_vel = resolve_paddle_collision(
         ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(5, 0), ball_radius=10.0,
-        paddle_pos=pygame.math.Vector2(15, 0), paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        paddle_pos=pygame.math.Vector2(15, 0), paddle_prev_pos=pygame.math.Vector2(15, 0),
+        paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
         restitution=0.0,
     )
     assert new_vel == pygame.math.Vector2(0.0, 0.0)
@@ -149,12 +152,27 @@ def test_clamp_speed_leaves_slow_velocity_unchanged():
     assert result == pygame.math.Vector2(1, 2)
 
 
+def test_resolve_paddle_collision_catches_fast_paddle_sweep_through_ball():
+    # Reproduces the review finding: a paddle moving fast enough can end the
+    # frame far from the ball even though it swept straight through it.
+    # paddle_prev_pos/paddle_pos describe that sweep; distance-at-final-
+    # position alone (old behavior) would miss it (200 > min_distance 20).
+    result = resolve_paddle_collision(
+        ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(0, 0), ball_radius=10.0,
+        paddle_pos=pygame.math.Vector2(200, 0), paddle_prev_pos=pygame.math.Vector2(-200, 0),
+        paddle_vel=pygame.math.Vector2(4000, 0), paddle_radius=10.0,
+        restitution=1.0,
+    )
+    assert result is not None
+
+
 def test_resolve_paddle_collision_transfers_paddle_velocity():
     # Paddle approaches the stationary ball from the left (paddle_vel points
     # toward the ball), so the collision triggers and transfers momentum.
     _, new_vel = resolve_paddle_collision(
         ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(0, 0), ball_radius=10.0,
-        paddle_pos=pygame.math.Vector2(-15, 0), paddle_vel=pygame.math.Vector2(20, 0), paddle_radius=10.0,
+        paddle_pos=pygame.math.Vector2(-15, 0), paddle_prev_pos=pygame.math.Vector2(-15, 0),
+        paddle_vel=pygame.math.Vector2(20, 0), paddle_radius=10.0,
         restitution=1.0,
     )
     assert new_vel == pygame.math.Vector2(40.0, 0.0)

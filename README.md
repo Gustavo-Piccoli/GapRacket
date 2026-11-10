@@ -41,7 +41,7 @@ python main.py
 
 ## Testes
 
-As funções de física (`src/gapracket/physics.py`, `simulation.py`, `entities.py`, `config.py`) são puras e têm testes automatizados; a janela gráfica (`game.py`, `pause_menu.py`) é verificada manualmente.
+As funções de física (`src/gapracket/physics.py`, `simulation.py`, `entities.py`, `config.py`) são puras e têm testes automatizados. A janela gráfica (`game.py`, `pause_menu.py`) foi verificada só por scripts automatizados que chamam os métodos diretamente (sem interação real de mouse/teclado); jogue algumas partidas antes de confiar 100% na experiência interativa (mouse nos dois eixos, ESC/P, arrastar os sliders, os presets, tacadas rápidas, sliders nos extremos).
 
 ```bash
 pytest

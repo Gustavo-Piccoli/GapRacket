@@ -29,8 +29,13 @@ Todas as forças são somadas e integradas a cada frame (Euler semi-implícito: 
 ```
 dir = (pos_raquete - pos_bolinha) normalizado
 dist = |pos_raquete - pos_bolinha|
-F_elastico = k * (dist - comprimento_natural) * dir
-           - c * (v_bolinha - v_raquete) projetada em dir
+se dist <= comprimento_natural:
+    F_elastico = 0   # frouxo — comporta-se como um elástico de borracha
+                     # de verdade, não como uma haste rígida que também
+                     # empurra quando comprimida
+senão:
+    F_elastico = k * (dist - comprimento_natural) * dir
+               - c * (v_bolinha - v_raquete) projetada em dir
 ```
 - `k` = coeficiente elástico (configurável)
 - `comprimento_natural` = distância de repouso (configurável)

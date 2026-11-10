@@ -24,7 +24,11 @@ def test_elastic_force_pulls_toward_paddle_when_stretched():
     assert force == pygame.math.Vector2(1000.0, 0.0)
 
 
-def test_elastic_force_pushes_away_when_compressed():
+def test_elastic_force_goes_slack_when_compressed():
+    # A real elastic cord goes slack (no force at all) when the distance is
+    # below its natural length — it doesn't push back like a rigid rod.
+    # Reproduces the reported bug: the ball could be "balanced" on the
+    # elastic like a stick because compression used to push back.
     force = elastic_force(
         ball_pos=pygame.math.Vector2(0, 0),
         ball_vel=pygame.math.Vector2(0, 0),
@@ -32,16 +36,31 @@ def test_elastic_force_pushes_away_when_compressed():
         paddle_vel=pygame.math.Vector2(0, 0),
         k=10.0, natural_length=100.0, damping=0.0,
     )
-    assert force == pygame.math.Vector2(-500.0, 0.0)
+    assert force == pygame.math.Vector2(0.0, 0.0)
 
 
-def test_elastic_force_damps_relative_velocity():
+def test_elastic_force_goes_slack_exactly_at_natural_length():
+    # Nonzero relative velocity so a lingering damping term (even with no
+    # spring stretch) would show up if slack weren't fully zero-force.
     force = elastic_force(
         ball_pos=pygame.math.Vector2(0, 0),
         ball_vel=pygame.math.Vector2(5, 0),
         paddle_pos=pygame.math.Vector2(100, 0),
         paddle_vel=pygame.math.Vector2(0, 0),
-        k=0.0, natural_length=100.0, damping=2.0,
+        k=10.0, natural_length=100.0, damping=5.0,
+    )
+    assert force == pygame.math.Vector2(0.0, 0.0)
+
+
+def test_elastic_force_damps_relative_velocity():
+    # Distance (150) is kept above natural_length (50) so the elastic is
+    # taut and damping actually applies (k=0 isolates the damping term).
+    force = elastic_force(
+        ball_pos=pygame.math.Vector2(0, 0),
+        ball_vel=pygame.math.Vector2(5, 0),
+        paddle_pos=pygame.math.Vector2(150, 0),
+        paddle_vel=pygame.math.Vector2(0, 0),
+        k=0.0, natural_length=50.0, damping=2.0,
     )
     assert force == pygame.math.Vector2(-10.0, 0.0)
 

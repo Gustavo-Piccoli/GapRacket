@@ -14,7 +14,10 @@ def elastic_force(
 ) -> Vector2:
     delta = paddle_pos - ball_pos
     distance = delta.length()
-    if distance == 0:
+    if distance <= natural_length:
+        # Slack elastic (not stretched past its natural length) exerts no
+        # force at all — like a real rubber cord, not a rigid rod that also
+        # pushes back when compressed. Also covers distance == 0 safely.
         return Vector2(0, 0)
     direction = delta / distance
     spring = k * (distance - natural_length)

@@ -2,6 +2,7 @@ import pygame
 
 from gapracket.config import PhysicsConfig
 from gapracket.entities import Ball, Paddle
+from gapracket.pause_menu import PauseMenu
 from gapracket.simulation import step_simulation
 
 Vector2 = pygame.math.Vector2
@@ -36,6 +37,7 @@ class GameLoop:
             radius=self.config.paddle_radius,
         )
         self.paused = False
+        self.pause_menu = PauseMenu(self.config)
 
     def run(self) -> None:
         dt = 1 / FPS
@@ -46,6 +48,8 @@ class GameLoop:
                     running = False
                 elif event.type == pygame.KEYDOWN and event.key in (pygame.K_ESCAPE, pygame.K_p):
                     self.paused = not self.paused
+                elif self.paused:
+                    self.pause_menu.handle_event(event)
 
             self.paddle.update_from_mouse(Vector2(pygame.mouse.get_pos()), dt)
 
@@ -65,4 +69,6 @@ class GameLoop:
         pygame.draw.line(self.screen, ELASTIC_COLOR, self.paddle.position, self.ball.position, 2)
         pygame.draw.circle(self.screen, PADDLE_COLOR, self.paddle.position, self.config.paddle_radius)
         pygame.draw.circle(self.screen, BALL_COLOR, self.ball.position, self.config.ball_radius)
+        if self.paused:
+            self.pause_menu.draw(self.screen)
         pygame.display.flip()

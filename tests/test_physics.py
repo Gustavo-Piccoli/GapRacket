@@ -1,6 +1,14 @@
 import pygame
 
-from gapracket.physics import elastic_force, gravity_force, drag_force, integrate
+from gapracket.physics import (
+    elastic_force,
+    gravity_force,
+    drag_force,
+    integrate,
+    reflect_velocity,
+    resolve_wall_collision,
+    resolve_paddle_collision,
+)
 
 
 def test_elastic_force_pulls_toward_paddle_when_stretched():
@@ -64,3 +72,77 @@ def test_integrate_semi_implicit_euler():
     )
     assert new_vel == pygame.math.Vector2(1.0, 0.5)
     assert new_pos == pygame.math.Vector2(0.1, 0.05)
+
+
+def test_reflect_velocity_bounces_off_normal():
+    result = reflect_velocity(pygame.math.Vector2(0, 5), normal=pygame.math.Vector2(0, -1), restitution=1.0)
+    assert result == pygame.math.Vector2(0, -5)
+
+
+def test_reflect_velocity_restitution_zero_stops_normal_component():
+    result = reflect_velocity(pygame.math.Vector2(0, 5), normal=pygame.math.Vector2(0, -1), restitution=0.0)
+    assert result == pygame.math.Vector2(0, 0)
+
+
+def test_reflect_velocity_ignores_separating_motion():
+    result = reflect_velocity(pygame.math.Vector2(0, -5), normal=pygame.math.Vector2(0, -1), restitution=1.0)
+    assert result == pygame.math.Vector2(0, -5)
+
+
+def test_resolve_wall_collision_bottom_wall():
+    new_pos, new_vel = resolve_wall_collision(
+        position=pygame.math.Vector2(50, 195), velocity=pygame.math.Vector2(0, 10),
+        radius=10.0, width=400.0, height=200.0, restitution=0.5,
+    )
+    assert new_pos == pygame.math.Vector2(50, 190)
+    assert new_vel == pygame.math.Vector2(0, -5.0)
+
+
+def test_resolve_wall_collision_no_wall_hit_is_unchanged():
+    new_pos, new_vel = resolve_wall_collision(
+        position=pygame.math.Vector2(50, 50), velocity=pygame.math.Vector2(1, 1),
+        radius=10.0, width=400.0, height=200.0, restitution=0.5,
+    )
+    assert new_pos == pygame.math.Vector2(50, 50)
+    assert new_vel == pygame.math.Vector2(1, 1)
+
+
+def test_resolve_paddle_collision_overlapping_separates_and_bounces():
+    result = resolve_paddle_collision(
+        ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(5, 0), ball_radius=10.0,
+        paddle_pos=pygame.math.Vector2(15, 0), paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        restitution=1.0,
+    )
+    assert result is not None
+    new_pos, new_vel = result
+    assert new_pos == pygame.math.Vector2(-5.0, 0.0)
+    assert new_vel == pygame.math.Vector2(-5.0, 0.0)
+
+
+def test_resolve_paddle_collision_no_overlap_returns_none():
+    result = resolve_paddle_collision(
+        ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(0, 0), ball_radius=10.0,
+        paddle_pos=pygame.math.Vector2(100, 0), paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        restitution=1.0,
+    )
+    assert result is None
+
+
+def test_resolve_paddle_collision_zero_restitution_kills_closing_speed():
+    _, new_vel = resolve_paddle_collision(
+        ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(5, 0), ball_radius=10.0,
+        paddle_pos=pygame.math.Vector2(15, 0), paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        restitution=0.0,
+    )
+    assert new_vel == pygame.math.Vector2(0.0, 0.0)
+
+
+def test_resolve_paddle_collision_transfers_paddle_velocity():
+    # Paddle approaches the stationary ball from the left (paddle_vel points
+    # toward the ball), so the collision triggers and transfers momentum.
+    _, new_vel = resolve_paddle_collision(
+        ball_pos=pygame.math.Vector2(0, 0), ball_vel=pygame.math.Vector2(0, 0), ball_radius=10.0,
+        paddle_pos=pygame.math.Vector2(-15, 0), paddle_vel=pygame.math.Vector2(20, 0), paddle_radius=10.0,
+        restitution=1.0,
+    )
+    assert new_vel == pygame.math.Vector2(40.0, 0.0)

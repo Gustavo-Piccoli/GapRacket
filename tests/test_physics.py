@@ -142,6 +142,20 @@ def test_resolve_paddle_collision_zero_restitution_kills_closing_speed():
     assert new_vel == pygame.math.Vector2(0.0, 0.0)
 
 
+def test_resolve_paddle_collision_zero_distance_stationary_returns_none():
+    # Ball exactly concentric with a stationary paddle: delta can't give a
+    # normal and there's no travel direction to fall back to either, so this
+    # genuinely degenerate case is left for the next frame's forces to
+    # separate (Review Focus #2, paddle-collision side).
+    result = resolve_paddle_collision(
+        ball_pos=pygame.math.Vector2(10, 10), ball_vel=pygame.math.Vector2(0, 0), ball_radius=10.0,
+        paddle_pos=pygame.math.Vector2(10, 10), paddle_prev_pos=pygame.math.Vector2(10, 10),
+        paddle_vel=pygame.math.Vector2(0, 0), paddle_radius=10.0,
+        restitution=1.0,
+    )
+    assert result is None
+
+
 def test_clamp_speed_limits_magnitude():
     result = clamp_speed(pygame.math.Vector2(3000, 4000), max_speed=1000.0)
     assert result.length() == pytest.approx(1000.0)

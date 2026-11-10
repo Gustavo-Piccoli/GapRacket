@@ -40,3 +40,8 @@ VISCOSITY_PRESETS: dict[str, float] = {
     "agua": 4.0,
     "mel": 9.0,
 }
+
+
+def reset_config(config: PhysicsConfig) -> None:
+    for name, spec in PARAM_SPECS.items():
+        setattr(config, name, spec.default)

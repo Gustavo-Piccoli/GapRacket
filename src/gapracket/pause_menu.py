@@ -1,12 +1,13 @@
 import pygame
 
-from gapracket.config import PARAM_SPECS, VISCOSITY_PRESETS, PhysicsConfig
+from gapracket.config import PARAM_SPECS, VISCOSITY_PRESETS, PhysicsConfig, reset_config
 
 FONT_COLOR = (230, 230, 230)
 TRACK_COLOR = (80, 80, 90)
 HANDLE_COLOR = (240, 200, 90)
 PANEL_COLOR = (20, 20, 28, 230)
 BUTTON_COLOR = (70, 70, 110)
+RESET_BUTTON_COLOR = (130, 60, 60)
 
 SLIDER_SPACING = 44
 TRACK_X = 260
@@ -15,6 +16,8 @@ TOP_MARGIN = 30
 LEFT_MARGIN = 20
 BUTTON_WIDTH = 70
 BUTTON_HEIGHT = 26
+RESET_BUTTON_WIDTH = 140
+RESET_BUTTON_HEIGHT = 30
 
 
 class PauseMenu:
@@ -36,11 +39,16 @@ class PauseMenu:
             self.preset_buttons[preset_name] = pygame.Rect(bx, by, BUTTON_WIDTH, BUTTON_HEIGHT)
             bx += BUTTON_WIDTH + 10
 
+        self.reset_button = pygame.Rect(TRACK_X, by + BUTTON_HEIGHT + 14, RESET_BUTTON_WIDTH, RESET_BUTTON_HEIGHT)
+
         self._dragging: str | None = None
 
     def handle_event(self, event: pygame.event.Event) -> None:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             pos = event.pos
+            if self.reset_button.collidepoint(pos):
+                reset_config(self.config)
+                return
             for preset_name, rect in self.preset_buttons.items():
                 if rect.collidepoint(pos):
                     self.config.viscosity = VISCOSITY_PRESETS[preset_name]
@@ -84,3 +92,8 @@ class PauseMenu:
             pygame.draw.rect(surface, BUTTON_COLOR, rect)
             label = self.font.render(preset_name, True, FONT_COLOR)
             surface.blit(label, (rect.x + 6, rect.y + 4))
+
+        pygame.draw.rect(surface, RESET_BUTTON_COLOR, self.reset_button, border_radius=4)
+        reset_label = self.font.render("Resetar valores", True, FONT_COLOR)
+        label_rect = reset_label.get_rect(center=self.reset_button.center)
+        surface.blit(reset_label, label_rect)

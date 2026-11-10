@@ -39,6 +39,26 @@ python main.py
 | Raio da bolinha (`ball_radius`) | Tamanho da bolinha e área de colisão |
 | Tamanho da raquete (`paddle_radius`) | Tamanho da raquete e área de colisão |
 
+## Gerar um executável (.exe) para Windows
+
+```bash
+pip install -r requirements-build.txt
+python scripts/generate_icon.py          # gera assets/icon.ico a partir das cores do jogo
+pyinstaller --onefile --windowed --name GapRacket --icon assets/icon.ico --paths src main.py
+```
+
+O executável fica em `dist/GapRacket.exe` (standalone, não precisa de Python instalado). Para criar um atalho na área de trabalho com o ícone do jogo, no PowerShell:
+
+```powershell
+$WshShell = New-Object -ComObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut("$([Environment]::GetFolderPath('Desktop'))\GapRacket.lnk")
+$Shortcut.TargetPath = "$PWD\dist\GapRacket.exe"
+$Shortcut.IconLocation = "$PWD\assets\icon.ico"
+$Shortcut.Save()
+```
+
+`dist/` e `build/` (artefatos gerados pelo PyInstaller) não são versionados.
+
 ## Testes
 
 As funções de física (`src/gapracket/physics.py`, `simulation.py`, `entities.py`, `config.py`) são puras e têm testes automatizados. A janela gráfica (`game.py`, `pause_menu.py`) foi verificada só por scripts automatizados que chamam os métodos diretamente (sem interação real de mouse/teclado); jogue algumas partidas antes de confiar 100% na experiência interativa (mouse nos dois eixos, ESC/P, arrastar os sliders, os presets, tacadas rápidas, sliders nos extremos).

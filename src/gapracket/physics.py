@@ -102,3 +102,10 @@ def resolve_paddle_collision(
     new_position = paddle_pos + normal * min_distance
     new_velocity = new_relative_vel + paddle_vel
     return new_position, new_velocity
+
+
+def clamp_speed(velocity: Vector2, max_speed: float) -> Vector2:
+    speed = velocity.length()
+    if speed > max_speed:
+        return velocity * (max_speed / speed)
+    return velocity

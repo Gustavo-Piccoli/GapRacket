@@ -1,4 +1,5 @@
 import pygame
+import pytest
 
 from gapracket.physics import (
     elastic_force,
@@ -8,6 +9,7 @@ from gapracket.physics import (
     reflect_velocity,
     resolve_wall_collision,
     resolve_paddle_collision,
+    clamp_speed,
 )
 
 
@@ -135,6 +137,16 @@ def test_resolve_paddle_collision_zero_restitution_kills_closing_speed():
         restitution=0.0,
     )
     assert new_vel == pygame.math.Vector2(0.0, 0.0)
+
+
+def test_clamp_speed_limits_magnitude():
+    result = clamp_speed(pygame.math.Vector2(3000, 4000), max_speed=1000.0)
+    assert result.length() == pytest.approx(1000.0)
+
+
+def test_clamp_speed_leaves_slow_velocity_unchanged():
+    result = clamp_speed(pygame.math.Vector2(1, 2), max_speed=1000.0)
+    assert result == pygame.math.Vector2(1, 2)
 
 
 def test_resolve_paddle_collision_transfers_paddle_velocity():

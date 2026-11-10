@@ -10,6 +10,7 @@ Vector2 = pygame.math.Vector2
 BACKGROUND_COLOR = (18, 18, 24)
 ELASTIC_COLOR = (90, 90, 110)
 PADDLE_COLOR = (90, 180, 240)
+HANDLE_COLOR = (120, 80, 50)
 BALL_COLOR = (240, 200, 90)
 FPS = 60
 
@@ -66,8 +67,23 @@ class GameLoop:
     def _draw(self) -> None:
         self.screen.fill(BACKGROUND_COLOR)
         pygame.draw.line(self.screen, ELASTIC_COLOR, self.paddle.position, self.ball.position, 2)
-        pygame.draw.circle(self.screen, PADDLE_COLOR, self.paddle.position, self.config.paddle_radius)
+        self._draw_paddle()
         pygame.draw.circle(self.screen, BALL_COLOR, self.ball.position, self.config.ball_radius)
         if self.paused:
             self.pause_menu.draw(self.screen)
         pygame.display.flip()
+
+    def _draw_paddle(self) -> None:
+        # Ping-pong paddle look: a round blade (same hitbox as before) with a
+        # handle in a fixed orientation (always pointing down), not rotating
+        # to face the ball — the simpler of the two options for this toy.
+        radius = self.config.paddle_radius
+        center = self.paddle.position
+
+        handle_width = radius * 0.45
+        handle_height = radius * 0.9
+        handle_rect = pygame.Rect(0, 0, handle_width, handle_height)
+        handle_rect.midtop = (center.x, center.y + radius - 2)
+        pygame.draw.rect(self.screen, HANDLE_COLOR, handle_rect, border_radius=int(handle_width / 2))
+
+        pygame.draw.circle(self.screen, PADDLE_COLOR, center, radius)

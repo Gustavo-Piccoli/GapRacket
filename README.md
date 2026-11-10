@@ -1,0 +1,48 @@
+# GapRacket
+
+Um brinquedo de física extremamente simples: uma raquete controlada pelo mouse, presa por um elástico a uma bolinha. A bolinha quica na raquete e nas bordas da tela, com gravidade, arrasto do meio e um elástico de mola com amortecimento. Sem pontuação, sem vitória ou derrota — o foco é mover a raquete e brincar com os parâmetros físicos em tempo real.
+
+## Instalação
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate   # Windows
+# source .venv/bin/activate   # Linux/macOS
+pip install -r requirements.txt
+```
+
+> O projeto usa [`pygame-ce`](https://pyga.me/) (fork binário-compatível do `pygame`), porque o `pygame` ainda não publica wheel para versões muito recentes do Python. Ambos se importam como `pygame`.
+
+## Como rodar
+
+```bash
+python main.py
+```
+
+## Controles
+
+- **Mouse**: move a raquete livremente pela tela (eixos X e Y). A velocidade do movimento do mouse é transferida como "tacada" quando a raquete toca a bolinha.
+- **ESC** ou **P**: pausa/retoma o jogo e mostra/esconde o menu de configurações. A raquete continua seguindo o mouse mesmo pausado.
+- No menu de pausa, arraste os sliders com o mouse para ajustar cada parâmetro em tempo real.
+
+## Parâmetros configuráveis
+
+| Parâmetro | Afeta |
+|---|---|
+| Coeficiente elástico (`elastic_k`) | Força da mola do elástico |
+| Comprimento natural do elástico (`natural_length`) | Distância de repouso do elástico |
+| Coeficiente de amortecimento do elástico (`damping`) | Perda de energia da oscilação do elástico |
+| Massa da bolinha (`ball_mass`) | Inércia da bolinha, peso da gravidade |
+| Gravidade (`gravity`) | Força constante para baixo |
+| Coeficiente de restituição (`restitution`) | "Quique" nas colisões bolinha↔raquete e bolinha↔paredes |
+| Viscosidade do meio (`viscosity`) | Arrasto/resistência sobre a bolinha — tem presets de vácuo, ar, água e mel |
+| Raio da bolinha (`ball_radius`) | Tamanho da bolinha e área de colisão |
+| Tamanho da raquete (`paddle_radius`) | Tamanho da raquete e área de colisão |
+
+## Testes
+
+As funções de física (`src/gapracket/physics.py`, `simulation.py`, `entities.py`, `config.py`) são puras e têm testes automatizados; a janela gráfica (`game.py`, `pause_menu.py`) é verificada manualmente.
+
+```bash
+pytest
+```

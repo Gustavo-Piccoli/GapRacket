@@ -51,9 +51,8 @@ class GameLoop:
                 elif self.paused:
                     self.pause_menu.handle_event(event)
 
-            self.paddle.update_from_mouse(Vector2(pygame.mouse.get_pos()), dt)
-
             if not self.paused:
+                self.paddle.update_from_mouse(Vector2(pygame.mouse.get_pos()), dt)
                 step_simulation(
                     self.ball, self.paddle, self.config, dt,
                     self.screen_width, self.screen_height,

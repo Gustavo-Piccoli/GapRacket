@@ -24,6 +24,7 @@ python main.py
 - **Mouse**: move a raquete livremente pela tela (eixos X e Y). A velocidade do movimento do mouse é transferida como "tacada" quando a raquete toca a bolinha.
 - **ESC** ou **P**: pausa/retoma o jogo e mostra/esconde o menu de configurações. A raquete e a bolinha ficam congeladas enquanto pausado.
 - No menu de pausa, arraste os sliders com o mouse para ajustar cada parâmetro em tempo real.
+- Botão **"Resetar valores"** no menu de pausa: volta todos os parâmetros para os valores padrão.
 
 ## Parâmetros configuráveis
 
